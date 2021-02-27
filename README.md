@@ -1,1 +1,1 @@
-# -prime-minister-classification
+# prime-minister-classification
