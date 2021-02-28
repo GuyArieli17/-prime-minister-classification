@@ -11,19 +11,25 @@ async function start() {
   const container = document.createElement('div');
   container.style.position = 'relative';
   document.body.append(container);
+  const labeledFaceDescription = await loadLabeledImages();
+  const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescription,0.6);
+  let convertedImage;
+  let canvas;
   fileUpload.addEventListener('change',async()=>{
-      const image = fileUpload.files[0];
-      const convertedImage = await faceapi.bufferToImage(image);
+      if(convertedImage)convertedImage.remove();
+      if(canvas)canvas.remove();
+      convertedImage = await faceapi.bufferToImage(fileUpload.files[0]);
       container.append(convertedImage);
-      const canvas = faceapi.createCanvasFromMedia(convertedImage);
+      canvas = faceapi.createCanvasFromMedia(convertedImage);
       container.append(canvas);
       const displaySize = { width: convertedImage.width, height: convertedImage.height};
       faceapi.matchDimensions(canvas,displaySize);
       const detection = await faceapi.detectAllFaces(convertedImage).withFaceLandmarks().withFaceDescriptors();
       const resizeDetection = faceapi.resizeResults(detection,displaySize);
-      resizeDetection.forEach(detection =>{
-        const box = detection.detection.box;
-        const drawBox = new faceapi.draw.DrawBox(box,{label: 'Face'});
+      const results = resizeDetection.map(d=>faceMatcher.findBestMatch(d.descriptor));
+      results.forEach((result,index) =>{
+        const box = resizeDetection[i].detection.box;
+        const drawBox = new faceapi.draw.DrawBox(box,{label: result.toString()});
         drawBox.draw(canvas);
       })
      
@@ -43,6 +49,16 @@ function loadLabeledImages(){
                     'David Ben-Gurion',
                     'Moshe Sharett',
                   ];
-                  
+  return Promise.all([
+    labels.map(async label =>{
+      const description = [];
+      for(let i=0; i<=2;i++){
+          const image = await faceapi.fetchImages(`https://github.com/GuyArieli17/prime-minister-classification/tree/main/labeled_images/${label}/${i}.png`);
+          const detections = await faceapi.detectSingleFace(image).withFaceLandmarks().withFaceDescriptors();
+          description.push(detections.descriptor);
+      }
+      return new faceapi.LabeledFaceDescriptors(label,detections.descriptor)
+    })
+  ]);
   
 }
