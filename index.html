@@ -6,27 +6,23 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <script defer src="face-api.min.js"></script>
   <script defer src="index.js"></script>
-  <title>Face Recognition</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column
-    }
-
-    canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-  </style>
+  <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+  <link rel="stylesheet" href="./style.css">
+  <title>Prime-minister</title>
 </head>
 <body>
-  <input type="file" id="fileUpload">
+  <div class='spinner-wrapper'>
+    <div class="spinner"></div>
+</div>
+
+<div class="main-content">
+   <div class="drag-area">
+    <div class="icon"><i class="fas fa-cloud-upload-alt"></i></div>
+    <header>Drag & Drop to Upload File</header>
+    <span>OR</span>
+    <button>Browse File</button>
+    <input id="uploadFile" type="file" hidden>
+  </div>
+</div>
 </body>
 </html>
