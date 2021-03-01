@@ -1,4 +1,5 @@
-const imageUpload = document.getElementById('fileUpload')
+const imageUpload = document.getElementById('uploadFile');
+let spinnerWrapper = document.querySelector('.spinner-wrapper');
 
 Promise.all([
   faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
@@ -6,21 +7,48 @@ Promise.all([
   faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
 ]).then(start)
 
+
+
+
+//selecting all required elements
+const dropArea = document.querySelector(".drag-area");
+const dragText = dropArea.querySelector("header");
+const button = dropArea.querySelector("button");
+const input = dropArea.querySelector("input");
+let file; //this is a global variable and we'll use it inside multiple functions
+button.onclick = ()=>{
+  input.click(); //if user click on the button then the input also clicked
+}
+
+
+
 async function start() {
   const container = document.createElement('div');
-  container.style.position = 'relative';
+  container.style.position = 'absolute';
   document.body.append(container);
   const labeledFaceDescriptors = await loadLabeledImages();
   const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
   let image;
   let canvas;
-  document.body.append('Loaded');
-  imageUpload.addEventListener('change', async () => {
-    if (image) image.remove();
-    if (canvas) canvas.remove();
+  spinnerWrapper.parentElement.removeChild(spinnerWrapper);
+ 
+
+  input.addEventListener('change', async () => {
+    file =imageUpload.files[0];
+    let fileType = file.type; //getting selected file type
+    let validExtensions = ["image/jpeg", "image/jpg", "image/png"]; //adding some valid image extensions in array
+    if(!validExtensions.includes(fileType)){ //if user selected file is an image file
+      alert("This is not an Image File!");
+      dropArea.classList.remove("active");
+      dragText.textContent = "Drag & Drop to Upload File";
+    }
     image = await faceapi.bufferToImage(imageUpload.files[0]);
+    image.style.width ='700px';
+    image.style.height = '510px';
     container.append(image);
     canvas = faceapi.createCanvasFromMedia(image);
+    canvas.style.width ='700px';
+    canvas.style.height = '510px';
     container.append(canvas);
     const displaySize = { width: image.width, height: image.height };
     faceapi.matchDimensions(canvas, displaySize);
@@ -32,6 +60,10 @@ async function start() {
       const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() });
       drawBox.draw(canvas);
     })
+    canvas.addEventListener('click',()=>{
+      if (image) image.remove();
+      if (canvas) canvas.remove();
+    });
   })
 }
 
@@ -45,7 +77,7 @@ function loadLabeledImages() {
     'Yitzhak Rabin',
     'Yitzhak Shamir',
     'Menachem Begin',
-    'Golda%20Meir',
+    'Golda Meir',
     'David Ben-Gurion',
     'Moshe Sharett',
   ];
